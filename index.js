@@ -1,6 +1,8 @@
 import "dotenv/config";
 import { Server } from "socket.io";
 import DBWalker from "linkdevs-db-walker";
+import { v4 as uuidv4 } from "uuid";
+import { date } from "locutus/php/datetime/index.js";
 
 const io = new Server({ cors: { origin: "*" } });
 
@@ -12,11 +14,13 @@ export const base64 = (string) => {
     }
 }
 
+
 const getPaste = async (params) => {
     const db = new DBWalker();
 
     const select_paste_params = {};
     select_paste_params.table = "copypaste";
+    select_paste_params.columns = ["*"];
     select_paste_params.where = [`slug = '${params.slug}'`];
 
     const select_paste_sql = db.buildSelect(select_paste_params);
@@ -30,7 +34,18 @@ const insertPaste = async (data) => {
 
     const insert_paste_params = {};
     insert_paste_params.table = "copypaste";
-    insert_paste_params.data = { content: data.content };
+    const insert_paste_params_data = {};
+
+    insert_paste_params_data.uuid = data.uuid ?? uuidv4();
+    if (data.slug) insert_paste_params_data.slug = data.slug;
+    insert_paste_params_data.content = data.content ?? "";
+    if (data.expire) insert_paste_params_data.expire = data.expire;
+    insert_paste_params_data.privacy = data.privacy ?? "public";
+    if (data.password) insert_paste_params_data.password = data.password;
+    insert_paste_params_data.updated_at = data.updated_at ?? date("Y-m-d H:i:s");
+    insert_paste_params_data.created_at = data.created_at ?? date("Y-m-d H:i:s");
+
+    insert_paste_params.data = [insert_paste_params_data];
 
     const insert_paste_sql = db.buildInsert(insert_paste_params);
     const insert_paste_result = await db.query(insert_paste_sql);
@@ -44,7 +59,13 @@ const updatePaste = async (params, data) => {
     const update_paste_params = {};
     update_paste_params.table = "copypaste";
     update_paste_params.where = [`slug = '${params.slug}'`];
-    update_paste_params.data = { content: data.content };
+    update_paste_params.data = {};
+
+    if (data.content) update_paste_params.data.content = data.content;
+    if (data.expire) update_paste_params.data.expire = data.expire;
+    if (data.privacy) update_paste_params.data.privacy = data.privacy;
+    if (data.password) update_paste_params.data.password = data.password;
+    update_paste_params.data.updated_at = data.updated_at ?? date("Y-m-d H:i:s");
 
     const update_paste_sql = db.buildUpdate(update_paste_params);
     const update_paste_result = await db.query(update_paste_sql);
@@ -59,18 +80,8 @@ io.on("connection", (socket) => {
 
         const select_paste = await getPaste({ slug });
         if (select_paste.error) console.log("error", select_paste);
-        else {
-            if (select_paste.length > 0) socket.emit("copy", select_paste[0]);
-            else {
-                const insert_paste = await insertPaste({ slug });
-                if (insert_paste.error) console.log("error", insert_paste);
-                else {
-                    if (insert_paste.affectedRows > 0) {
-                        socket.emit("copy", { id: insert_paste.insertId, slug });
-                    }
-                }
-            }
-        }
+        if (select_paste.length > 0) socket.emit("copy", select_paste[0]);
+        else console.log("paste new");
     });
 
     socket.on("paste", async (slug, received) => {
@@ -82,6 +93,13 @@ io.on("connection", (socket) => {
                 io.to(slug).emit("copy", received);
             } else {
                 console.log("paste not found");
+                const insert_paste = await insertPaste({ slug, content: received.content });
+                if (insert_paste.affectedRows > 0) {
+                    received.id = insert_paste.insertId;
+                    io.to(slug).emit("copy", received);
+                } else {
+                    console.log("paste not inserted");
+                }
             }
         }
     });

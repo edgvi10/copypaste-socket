@@ -12,6 +12,8 @@
     "axios": "^0.26.0",
     "dotenv": "^16.0.0",
     "linkdevs-db-walker": "^0.0.5",
-    "socket.io": "^4.4.1"
+    "locutus": "^2.0.16",
+    "socket.io": "^4.4.1",
+    "uuid": "^8.3.2"
   }
 }
