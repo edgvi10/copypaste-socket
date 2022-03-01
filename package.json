@@ -1,0 +1,16 @@
+{
+  "name": "copypaste-socket",
+  "description": "Socket server to copypaste application",
+  "version": "0.1.3",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^0.26.0",
+    "dotenv": "^16.0.0",
+    "linkdevs-db-walker": "^0.0.4",
+    "socket.io": "^4.4.1"
+  }
+}
