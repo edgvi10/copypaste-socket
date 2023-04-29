@@ -6,6 +6,9 @@ import { date } from "locutus/php/datetime/index.js";
 
 const io = new Server({ cors: { origin: "*" } });
 
+
+const db = new DBWalker(process.env.DBWALKER_STRING);
+
 export const base64 = (string) => {
     return {
         encode: () => Buffer.from(string, "utf8").toString("base64"),
@@ -16,8 +19,6 @@ export const base64 = (string) => {
 
 
 const getPaste = async (params) => {
-    const db = new DBWalker();
-
     const select_paste_params = {};
     select_paste_params.table = "copypaste";
     select_paste_params.columns = ["*"];
@@ -30,8 +31,6 @@ const getPaste = async (params) => {
 };
 
 const insertPaste = async (data) => {
-    const db = new DBWalker();
-
     const insert_paste_params = {};
     insert_paste_params.table = "copypaste";
     const insert_paste_params_data = {};
@@ -54,7 +53,6 @@ const insertPaste = async (data) => {
 };
 
 const updatePaste = async (params, data) => {
-    const db = new DBWalker();
 
     const update_paste_params = {};
     update_paste_params.table = "copypaste";
