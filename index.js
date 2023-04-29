@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { Server } from "socket.io";
-import DBWalker from "linkdevs-db-walker";
+import DBWalker from "dbwalker";
 import { v4 as uuidv4 } from "uuid";
 import { date } from "locutus/php/datetime/index.js";
 

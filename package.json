@@ -11,7 +11,7 @@
   "dependencies": {
     "axios": "^0.26.0",
     "dotenv": "^16.0.0",
-    "linkdevs-db-walker": "^0.0.5",
+    "dbwalker": "^0.0.53",
     "locutus": "^2.0.16",
     "socket.io": "^4.4.1",
     "uuid": "^8.3.2"
